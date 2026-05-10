@@ -136,8 +136,14 @@ function paginateContent(content) {
   bookPages = [];
   const charsPerPage = calculateCharsPerPage();
   
-  for (let i = 0; i < content.length; i += charsPerPage) {
-    bookPages.push(content.substring(i, i + charsPerPage));
+  // For vertical mode: overlap pages to handle bottom cutoff
+  const overlap = isVerticalMode ? 30 : 0; // Overlap 30 chars (~1 line) in vertical mode
+  
+  let i = 0;
+  while (i < content.length) {
+    const end = Math.min(i + charsPerPage, content.length);
+    bookPages.push(content.substring(i, end));
+    i += charsPerPage - overlap; // Move forward, minus overlap
   }
 }
 
