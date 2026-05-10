@@ -126,7 +126,7 @@ function calculateCharsPerPage() {
     // Number of vertical lines that fit left-to-right
     const numVerticalLines = Math.floor(usableWidth / (fontSize * lineHeight * 1.3));
     
-    const total = Math.max(charsPerVerticalLine * numVerticalLines, 50);
+    const total = Math.max(Math.floor(charsPerVerticalLine * numVerticalLines * 0.5), 50); // Use only 50% of calculation
     
     console.log('Vertical - usable:', usableHeight, 'x', usableWidth);
     console.log('Vertical - chars/line:', charsPerVerticalLine, 'lines:', numVerticalLines, 'total:', total);
