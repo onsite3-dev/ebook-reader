@@ -110,10 +110,34 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: try fixed larger value to see if it wraps naturally
-    const testChars = 400;
-    console.log('Vertical - using fixed test value:', testChars);
-    return testChars;
+    // Vertical mode: find maximum chars that fit
+    bookText.textContent = '';
+    let safeChars = 400; // Start from known good value
+    
+    // Test increasing from 400 to find max
+    const testContent = currentBook ? currentBook.content : '測試內容的文字會自動換行到下一條直線這樣才能測量出真實的容量不然只會測到單一直線的容量'.repeat(10);
+    
+    for (let chars = 400; chars <= 600; chars += 50) {
+      const testText = testContent.substring(0, chars);
+      bookText.textContent = testText;
+      
+      const fitsHeight = bookText.scrollHeight <= containerHeight * 0.98;
+      const fitsWidth = bookText.scrollWidth <= containerWidth * 0.98;
+      
+      console.log(`Test ${chars} - H:${bookText.scrollHeight}/${containerHeight}(${fitsHeight}) W:${bookText.scrollWidth}/${containerWidth}(${fitsWidth})`);
+      
+      if (fitsHeight && fitsWidth) {
+        safeChars = chars;
+        console.log(`✓ ${chars} fits`);
+      } else {
+        console.log(`✗ ${chars} overflow, using ${safeChars}`);
+        break;
+      }
+    }
+    
+    bookText.textContent = '';
+    console.log('Vertical final:', safeChars);
+    return safeChars;
     
   } else {
     // Horizontal mode - existing calculation works fine
