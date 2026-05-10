@@ -111,8 +111,8 @@ function calculateCharsPerPage() {
   
   if (isVerticalMode) {
     // Vertical mode: use FIXED safe value
-    // Writing-mode calculation is unreliable, so just use a small fixed number
-    const safeChars = 30;
+    // Even 30 chars can overflow on some screens, use smaller value
+    const safeChars = 20;
     console.log('Vertical - using fixed safe value:', safeChars);
     return safeChars;
     
