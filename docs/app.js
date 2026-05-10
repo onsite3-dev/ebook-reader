@@ -136,8 +136,17 @@ function paginateContent(content) {
   bookPages = [];
   const charsPerPage = calculateCharsPerPage();
   
-  // For vertical mode: overlap pages to handle bottom cutoff
-  const overlap = isVerticalMode ? 50 : 0; // Overlap 50 chars (~2 lines) in vertical mode
+  // For vertical mode: overlap by ~2 vertical lines to handle bottom cutoff
+  let overlap = 0;
+  if (isVerticalMode) {
+    // In vertical mode, estimate chars per vertical line
+    const fontSize = parseInt(fontSizeInput.value);
+    const lineHeight = 1.8;
+    const containerHeight = bookText.clientHeight || 600;
+    const charsPerLine = Math.floor((containerHeight * 0.8) / (fontSize * 1.2));
+    overlap = charsPerLine * 2; // Overlap 2 vertical lines
+    console.log('Vertical overlap - chars per line:', charsPerLine, 'overlap 2 lines:', overlap);
+  }
   
   console.log('Pagination - mode:', isVerticalMode ? 'vertical' : 'horizontal', 'chars/page:', charsPerPage, 'overlap:', overlap);
   
