@@ -136,9 +136,13 @@ function calculateCharsPerPage() {
     const lineHeightPx = fontSize * lineHeight;
     const numLines = Math.floor(usableHeight / (lineHeightPx * 1.2));
     const charsPerLine = Math.floor(usableWidth / (fontSize * 0.8));
-    const total = Math.max(numLines * charsPerLine, 50);
     
-    console.log('Horizontal - lines:', numLines, 'chars/line:', charsPerLine, 'total:', total);
+    // Reserve 2 lines at bottom for mobile toolbar
+    const reserveLines = 2;
+    const displayLines = Math.max(numLines - reserveLines, 3);
+    const total = Math.max(displayLines * charsPerLine, 50);
+    
+    console.log('Horizontal - lines:', numLines, 'display:', displayLines, 'reserve:', reserveLines, 'chars/line:', charsPerLine, 'total:', total);
     return total;
   }
 }
@@ -147,14 +151,22 @@ function paginateContent(content) {
   bookPages = [];
   const charsPerPage = calculateCharsPerPage();
   
-  // For vertical mode: overlap by 2 lines to ensure continuity
+  // For both modes: overlap by 2 lines to ensure continuity
   let overlap = 0;
   if (isVerticalMode) {
     const fontSize = parseInt(fontSizeInput.value);
     const containerHeight = bookText.clientHeight || 600;
     const charsPerLine = Math.floor((containerHeight * 0.85) / (fontSize * 1.3));
     overlap = charsPerLine * 2; // Overlap 2 vertical lines
-    console.log('Vertical pagination - overlap:', overlap, 'chars (2 lines)');
+    console.log('Vertical overlap:', overlap, 'chars (2 lines)');
+  } else {
+    // Horizontal: overlap 2 lines
+    const fontSize = parseInt(fontSizeInput.value);
+    const lineHeight = 1.8;
+    const containerWidth = bookText.clientWidth || 800;
+    const charsPerLine = Math.floor((containerWidth * 0.90) / (fontSize * 0.8));
+    overlap = charsPerLine * 2;
+    console.log('Horizontal overlap:', overlap, 'chars (2 lines)');
   }
   
   console.log('Pagination - chars/page:', charsPerPage, 'overlap:', overlap);
