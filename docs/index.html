@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PP eReader V1.0.01</title>
+  <title>PP eReader V1.0.18</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* Fixed viewport for reading - no scrolling */
@@ -123,16 +123,17 @@
       cursor: not-allowed;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
   <header class="bg-white border-b border-gray-200">
     <div class="max-w-4xl mx-auto px-4 py-4">
       <div class="flex items-center justify-between mb-3">
-        <h1 class="text-xl font-semibold text-gray-900">PP eReader V1.0.17</h1>
+        <h1 class="text-xl font-semibold text-gray-900">PP eReader V1.0.18</h1>
         <label for="file-input" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors">
           Open File
         </label>
-        <input type="file" id="file-input" accept=".txt" class="hidden" />
+        <input type="file" id="file-input" accept=".txt,.epub" class="hidden" />
       </div>
       
       <div id="header-controls" class="hidden flex items-center justify-between pt-3 border-t border-gray-100">
