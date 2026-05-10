@@ -113,7 +113,7 @@ function calculateCharsPerPage() {
     // Vertical mode: use fixed safe value for reliability
     // Measurement-based approach causes edge cutoff on mobile
     // Trade capacity for zero cutoff guarantee
-    const safeChars = 250;
+    const safeChars = 230;
     console.log('Vertical - using fixed safe value:', safeChars);
     return safeChars;
     
