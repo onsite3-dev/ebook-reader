@@ -51,65 +51,19 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// EPUB helper functions
-async function extractTextFromEpub(file) {
-  try {
-    const zip = await JSZip.loadAsync(file);
-    let textContent = '';
-    
-    // Find all HTML/XHTML files in EPUB
-    const contentFiles = [];
-    zip.forEach((relativePath, zipEntry) => {
-      if (relativePath.match(/\.(html|xhtml|xml)$/i) && !relativePath.includes('META-INF')) {
-        contentFiles.push(relativePath);
-      }
-    });
-    
-    // Sort files (rough order)
-    contentFiles.sort();
-    
-    // Extract text from each file
-    for (const path of contentFiles) {
-      const content = await zip.file(path).async('string');
-      // Strip HTML tags and extract text
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = content;
-      const text = tempDiv.textContent || tempDiv.innerText || '';
-      textContent += text + '\n\n';
-    }
-    
-    return textContent.trim();
-  } catch (e) {
-    console.error('EPUB extraction failed:', e);
-    throw new Error('Failed to extract text from EPUB');
-  }
-}
-
 function handleFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
-  
-  const isEpub = file.name.toLowerCase().endsWith('.epub');
-  const isTxt = file.name.toLowerCase().endsWith('.txt');
-  
-  if (!isEpub && !isTxt) {
-    alert('Only TXT and EPUB files supported');
+  if (!file.name.endsWith('.txt')) {
+    alert('Only TXT files supported');
     return;
   }
-  
-  if (isEpub) {
-    // Handle EPUB
-    extractTextFromEpub(file)
-      .then(text => displayBook(file.name, text))
-      .catch(err => alert('Error reading EPUB: ' + err.message));
-  } else {
-    // Handle TXT
-    const reader = new FileReader();
-    reader.onload = (e) => displayBook(file.name, e.target.result);
-    reader.onerror = () => alert('Error reading file');
-    reader.readAsText(file);
-  }
+  const reader = new FileReader();
+  reader.onload = (e) => displayBook(file.name, e.target.result);
+  reader.onerror = () => alert('Error reading file');
+  reader.readAsText(file);
 }
+
 function displayBook(title, content) {
   currentBook = { title, content };
   bookTitle.textContent = title;
@@ -366,13 +320,16 @@ function loadReadingMode() {
 }
 
 function saveReadingMode() {
+  try {
+    localStorage.setItem(READING_MODE_KEY, isVerticalMode ? 'vertical' : 'horizontal');
+  } catch (e) {}
+}
+
 // Simplified to Traditional Chinese conversion
 let originalContent = null;
 let isConverted = false;
-const toggleS2TButton = document.getElementById('toggle-s2t');
 
 async function initOpenCC() {
-  // Wait for OpenCC to load
   if (typeof OpenCC === 'undefined') {
     console.error('OpenCC not loaded');
     return null;
@@ -380,43 +337,51 @@ async function initOpenCC() {
   return OpenCC.Converter({ from: 'cn', to: 'tw' });
 }
 
-toggleS2TButton.addEventListener('click', async () => {
-  if (!currentBook) return;
+function setupS2TButton() {
+  const toggleS2TButton = document.getElementById('toggle-s2t');
+  if (!toggleS2TButton) return;
   
-  // Save original on first conversion
-  if (!originalContent) {
-    originalContent = currentBook.content;
-  }
-  
-  isConverted = !isConverted;
-  
-  if (isConverted) {
-    // Convert to Traditional
-    toggleS2TButton.textContent = '繁→簡';
-    toggleS2TButton.disabled = true;
+  toggleS2TButton.addEventListener('click', async () => {
+    if (!currentBook) return;
     
-    try {
-      const converter = await initOpenCC();
-      if (converter) {
-        currentBook.content = converter(originalContent);
-      }
-    } catch (e) {
-      console.error('Conversion failed:', e);
-      alert('轉換失敗');
-      isConverted = false;
-      toggleS2TButton.textContent = '簡→繁';
+    if (!originalContent) {
+      originalContent = currentBook.content;
     }
     
-    toggleS2TButton.disabled = false;
-  } else {
-    // Restore original
-    toggleS2TButton.textContent = '簡→繁';
-    currentBook.content = originalContent;
-  }
-  
-  // Re-paginate with converted content
-  const currentPosition = getCurrentCharPosition();
-  paginateContent(currentBook.content);
-  restoreReadingPosition(currentPosition);
-  renderCurrentPage();
-});
+    isConverted = !isConverted;
+    
+    if (isConverted) {
+      toggleS2TButton.textContent = '繁→簡';
+      toggleS2TButton.disabled = true;
+      
+      try {
+        const converter = await initOpenCC();
+        if (converter) {
+          currentBook.content = converter(originalContent);
+        }
+      } catch (e) {
+        console.error('Conversion failed:', e);
+        alert('轉換失敗');
+        isConverted = false;
+        toggleS2TButton.textContent = '簡→繁';
+      }
+      
+      toggleS2TButton.disabled = false;
+    } else {
+      toggleS2TButton.textContent = '簡→繁';
+      currentBook.content = originalContent;
+    }
+    
+    const currentPosition = getCurrentCharPosition();
+    paginateContent(currentBook.content);
+    restoreReadingPosition(currentPosition);
+    renderCurrentPage();
+  });
+}
+
+// Call setup after DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupS2TButton);
+} else {
+  setupS2TButton();
+}
