@@ -33,13 +33,14 @@
       height: 100%; /* Fill parent container */
       width: 100%;
       overflow: hidden;
-      padding: 20px;
+      padding: 12px; /* Reduced padding */
       white-space: pre-wrap;
       word-wrap: break-word;
       color: #1f2937;
       line-height: 1.8;
       font-size: 24px;
       transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+      box-sizing: border-box; /* Include padding in height calculation */
     }
     
     #book-text.page-turning {
@@ -157,7 +158,7 @@
     </div>
   </header>
 
-  <main class="flex-1 px-6 py-4 relative overflow-hidden flex flex-col">
+  <main class="flex-1 px-4 py-2 relative overflow-hidden flex flex-col">
     <div id="empty-state" class="text-center py-16">
       <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -182,8 +183,8 @@
         </button>
       </div>
       
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-1 flex flex-col overflow-hidden mx-auto w-full" style="max-width: min(1200px, 90vw);">
-        <h2 id="book-title" class="text-xl font-bold text-gray-900 mb-3 pb-2 border-b border-gray-200 flex-shrink-0"></h2>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex-1 flex flex-col overflow-hidden mx-auto w-full" style="max-width: min(1200px, 90vw);">
+        <h2 id="book-title" class="text-lg font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200 flex-shrink-0"></h2>
         <div id="book-text" class="flex-1"></div>
       </div>
     </div>
