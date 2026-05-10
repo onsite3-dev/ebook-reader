@@ -75,19 +75,24 @@ function displayBook(title, content) {
   isVerticalMode = loadReadingMode();
   applyReadingDirection();
   
-  paginateContent(content);
-  currentPageIndex = 0;
-  renderCurrentPage();
-  
+  // Show UI first so container dimensions are correct
   emptyState.classList.add('hidden');
   readerContent.classList.remove('hidden');
   headerControls.classList.remove('hidden');
   
-  // Debug: log dimensions
-  console.log('Container clientHeight:', bookText.clientHeight);
-  console.log('Container clientWidth:', bookText.clientWidth);
-  console.log('Chars per page:', calculateCharsPerPage());
-  console.log('Total pages:', bookPages.length);
+  // Small delay to ensure rendering is complete
+  setTimeout(() => {
+    paginateContent(content);
+    currentPageIndex = 0;
+    renderCurrentPage();
+    
+    // Debug: log dimensions
+    console.log('Container clientHeight:', bookText.clientHeight);
+    console.log('Container clientWidth:', bookText.clientWidth);
+    console.log('Chars per page:', calculateCharsPerPage());
+    console.log('Total pages:', bookPages.length);
+    console.log('Content length:', content.length);
+  }, 100);
 }
 
 function calculateCharsPerPage() {
