@@ -130,14 +130,14 @@ function paginateContent(content) {
     // Render it temporarily to measure actual height
     bookText.textContent = testContent;
     
-    // Get actual rendered height with ultra-conservative safety margin
+    // Get actual rendered height with reasonable safety margin
     const renderedHeight = bookText.scrollHeight;
     const availableHeight = bookText.clientHeight;
-    const safeHeight = availableHeight * 0.75; // Use only 75% of available height (25% bottom margin)
+    const safeHeight = availableHeight * 0.90; // Use 90% of available height (10% bottom margin)
     
     // If content overflows safe zone, reduce it
     while (renderedHeight > safeHeight && testContent.length > 10) {
-      charsPerPage = Math.floor(charsPerPage * 0.80); // Reduce by 20% for faster convergence
+      charsPerPage = Math.floor(charsPerPage * 0.90); // Reduce by 10%
       testContent = remainingContent.substring(0, charsPerPage);
       bookText.textContent = testContent;
       // Re-measure after change
