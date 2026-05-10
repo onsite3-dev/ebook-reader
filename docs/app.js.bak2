@@ -366,52 +366,28 @@ function loadReadingMode() {
 }
 
 function saveReadingMode() {
-// Simplified to Traditional Chinese conversion
-let originalContent = null;
-let isConverted = false;
-const toggleS2TButton = document.getElementById('toggle-s2t');
-
-async function initOpenCC() {
-  // Wait for OpenCC to load
-  if (typeof OpenCC === 'undefined') {
-    console.error('OpenCC not loaded');
-    return null;
-  }
-  return OpenCC.Converter({ from: 'cn', to: 'tw' });
+  try {
+    localStorage.setItem(READING_MODE_KEY, isVerticalMode ? 'vertical' : 'horizontal');
+  } catch (e) {}
 }
 
-toggleS2TButton.addEventListener('click', async () => {
+// Simplified to Traditional Chinese conversion
+let isSimplified = true;
+const toggleS2TButton = document.getElementById('toggle-s2t');
+
+toggleS2TButton.addEventListener('click', () => {
   if (!currentBook) return;
   
-  // Save original on first conversion
-  if (!originalContent) {
-    originalContent = currentBook.content;
-  }
+  isSimplified = !isSimplified;
   
-  isConverted = !isConverted;
-  
-  if (isConverted) {
-    // Convert to Traditional
-    toggleS2TButton.textContent = '繁→簡';
-    toggleS2TButton.disabled = true;
-    
-    try {
-      const converter = await initOpenCC();
-      if (converter) {
-        currentBook.content = converter(originalContent);
-      }
-    } catch (e) {
-      console.error('Conversion failed:', e);
-      alert('轉換失敗');
-      isConverted = false;
-      toggleS2TButton.textContent = '簡→繁';
-    }
-    
-    toggleS2TButton.disabled = false;
-  } else {
-    // Restore original
+  if (isSimplified) {
+    // Already in original form, just re-paginate
     toggleS2TButton.textContent = '簡→繁';
-    currentBook.content = originalContent;
+  } else {
+    // Convert to Traditional Chinese
+    toggleS2TButton.textContent = '繁→簡';
+    const converter = OpenCC.Converter({ from: 'cn', to: 'tw' });
+    currentBook.content = converter(currentBook.content);
   }
   
   // Re-paginate with converted content
