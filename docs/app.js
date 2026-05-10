@@ -164,18 +164,33 @@ function changePage(direction) {
   if (newIndex < 0 || newIndex >= bookPages.length) return;
   currentPageIndex = newIndex;
   renderCurrentPage();
+  
+  // Fade out navigation buttons after click
+  document.querySelectorAll('.page-nav').forEach(nav => {
+    nav.style.opacity = '0.15';
+  });
 }
 
 function goToFirstPage() {
   if (currentPageIndex === 0) return;
   currentPageIndex = 0;
   renderCurrentPage();
+  
+  // Fade out navigation buttons
+  document.querySelectorAll('.page-nav').forEach(nav => {
+    nav.style.opacity = '0.15';
+  });
 }
 
 function goToLastPage() {
   if (currentPageIndex === bookPages.length - 1) return;
   currentPageIndex = bookPages.length - 1;
   renderCurrentPage();
+  
+  // Fade out navigation buttons
+  document.querySelectorAll('.page-nav').forEach(nav => {
+    nav.style.opacity = '0.15';
+  });
 }
 
 function promptJumpToPage() {
