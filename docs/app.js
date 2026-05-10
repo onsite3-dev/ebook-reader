@@ -110,33 +110,11 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // For vertical: iteratively find safe char count
-    let testCount = 100;
-    let safeCount = 30; // minimum fallback
-    
-    // Try decreasing amounts until it fits
-    for (let test = 100; test >= 20; test -= 20) {
-      const testText = '測'.repeat(test);
-      bookText.textContent = testText;
-      
-      const testHeight = bookText.scrollHeight;
-      const testWidth = bookText.scrollWidth;
-      
-      const fitsHeight = testHeight <= containerHeight * 0.9;
-      const fitsWidth = testWidth <= containerWidth * 0.9;
-      
-      console.log(`Test ${test} chars - H:${testHeight}(${fitsHeight}) W:${testWidth}(${fitsWidth})`);
-      
-      if (fitsHeight && fitsWidth) {
-        // This amount fits! Use 80% of it to be safe
-        safeCount = Math.floor(test * 0.8);
-        console.log(`✓ ${test} chars fit, using 80% = ${safeCount}`);
-        break;
-      }
-    }
-    
-    bookText.textContent = ''; // Clear test
-    return Math.max(safeCount, 20);
+    // Vertical mode: use FIXED safe value
+    // Writing-mode calculation is unreliable, so just use a small fixed number
+    const safeChars = 30;
+    console.log('Vertical - using fixed safe value:', safeChars);
+    return safeChars;
     
   } else {
     // Horizontal mode - existing calculation works fine
