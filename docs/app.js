@@ -121,8 +121,8 @@ function calculateCharsPerPage() {
       const testText = testContent.substring(0, chars);
       bookText.textContent = testText;
       
-      const fitsHeight = bookText.scrollHeight <= containerHeight * 0.98;
-      const fitsWidth = bookText.scrollWidth <= containerWidth * 0.98;
+      const fitsHeight = bookText.scrollHeight <= containerHeight * 0.92;
+      const fitsWidth = bookText.scrollWidth <= containerWidth * 0.92;
       
       console.log(`Test ${chars} - H:${bookText.scrollHeight}/${containerHeight}(${fitsHeight}) W:${bookText.scrollWidth}/${containerWidth}(${fitsWidth})`);
       
