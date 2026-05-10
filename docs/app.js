@@ -110,12 +110,23 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: use fixed safe value for reliability
-    // Measurement-based approach causes edge cutoff on mobile
-    // Trade capacity for zero cutoff guarantee
-    const safeChars = 230;
-    console.log('Vertical - using fixed safe value:', safeChars);
-    return safeChars;
+    // Vertical mode: calculate safe chars, leaving bottom lines for safety
+    const fontSize = parseInt(fontSizeInput.value);
+    const containerHeight = bookText.clientHeight || 600;
+    
+    // Estimate chars per vertical line
+    const charsPerLine = Math.floor((containerHeight * 0.85) / (fontSize * 1.3));
+    
+    // Base capacity: ~10 vertical lines worth
+    const numLines = 10;
+    const baseChars = charsPerLine * numLines;
+    
+    // Reserve 2 lines at bottom for mobile toolbar
+    const reserveLines = 2;
+    const safeChars = charsPerLine * (numLines - reserveLines);
+    
+    console.log('Vertical - chars/line:', charsPerLine, 'total lines:', numLines, 'reserve:', reserveLines, 'final:', safeChars);
+    return Math.max(safeChars, 150);
     
   } else {
     // Horizontal mode - existing calculation works fine
@@ -136,21 +147,23 @@ function paginateContent(content) {
   bookPages = [];
   const charsPerPage = calculateCharsPerPage();
   
-  // For vertical mode: large fixed overlap to ensure continuity
-  const overlap = isVerticalMode ? 100 : 0; // Fixed 100 chars overlap
+  // For vertical mode: overlap by 2 lines to ensure continuity
+  let overlap = 0;
+  if (isVerticalMode) {
+    const fontSize = parseInt(fontSizeInput.value);
+    const containerHeight = bookText.clientHeight || 600;
+    const charsPerLine = Math.floor((containerHeight * 0.85) / (fontSize * 1.3));
+    overlap = charsPerLine * 2; // Overlap 2 vertical lines
+    console.log('Vertical pagination - overlap:', overlap, 'chars (2 lines)');
+  }
   
-  console.log('Pagination - mode:', isVerticalMode ? 'vertical' : 'horizontal', 'chars/page:', charsPerPage, 'overlap:', overlap);
+  console.log('Pagination - chars/page:', charsPerPage, 'overlap:', overlap);
   
   let i = 0;
   while (i < content.length) {
     const end = Math.min(i + charsPerPage, content.length);
     bookPages.push(content.substring(i, end));
-    i += charsPerPage - overlap; // Move forward, minus overlap
-    
-    // Debug: show first 20 chars of each page
-    if (bookPages.length <= 3) {
-      console.log(`Page ${bookPages.length} starts with:`, content.substring(i, i + 20));
-    }
+    i += charsPerPage - overlap;
   }
   
   console.log('Total pages:', bookPages.length);
