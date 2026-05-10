@@ -1,3 +1,122 @@
+// IndexedDB for bookshelf storage
+const DB_NAME = 'PPeReaderDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'books';
+
+let db = null;
+
+async function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
+    };
+    
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('title', 'title', { unique: false });
+        store.createIndex('addedAt', 'addedAt', { unique: false });
+        store.createIndex('lastReadAt', 'lastReadAt', { unique: false });
+      }
+    };
+  });
+}
+
+async function saveBookToShelf(title, content) {
+  if (!db) await initDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    const book = {
+      title,
+      content,
+      addedAt: Date.now(),
+      lastReadAt: Date.now(),
+      progress: 0,
+      fontSize: 24,
+      isVertical: true
+    };
+    
+    const request = store.add(book);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function getAllBooks() {
+  if (!db) await initDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+    
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function getBookById(id) {
+  if (!db) await initDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(id);
+    
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function updateBookProgress(id, progress, pageIndex, fontSize, isVertical) {
+  if (!db) await initDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(id);
+    
+    request.onsuccess = () => {
+      const book = request.result;
+      if (book) {
+        book.progress = progress;
+        book.currentPage = pageIndex;
+        book.fontSize = fontSize;
+        book.isVertical = isVertical;
+        book.lastReadAt = Date.now();
+        
+        const updateRequest = store.put(book);
+        updateRequest.onsuccess = () => resolve();
+        updateRequest.onerror = () => reject(updateRequest.error);
+      }
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function deleteBook(id) {
+  if (!db) await initDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.delete(id);
+    
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Initialize DB on load
+initDB().catch(err => console.error('IndexedDB init failed:', err));
 // Debug version - let's see what's actually happening
 
 let currentBook = null;
@@ -443,4 +562,188 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', setupS2TButton);
 } else {
   setupS2TButton();
+}
+
+// Bookshelf UI functions
+let currentBookId = null;
+
+const viewBookshelfButton = document.getElementById('view-bookshelf');
+const closeBookshelfButton = document.getElementById('close-bookshelf');
+const addToShelfButton = document.getElementById('add-to-shelf');
+const bookshelfDiv = document.getElementById('bookshelf');
+const booksListDiv = document.getElementById('books-list');
+const emptyBookshelfDiv = document.getElementById('empty-bookshelf');
+
+async function showBookshelf() {
+  emptyState.classList.add('hidden');
+  readerContent.classList.add('hidden');
+  bookshelfDiv.classList.remove('hidden');
+  headerControls.classList.add('hidden');
+  
+  await loadBookshelf();
+}
+
+async function hideBookshelf() {
+  bookshelfDiv.classList.add('hidden');
+  emptyState.classList.remove('hidden');
+}
+
+async function loadBookshelf() {
+  try {
+    const books = await getAllBooks();
+    booksListDiv.innerHTML = '';
+    
+    if (books.length === 0) {
+      booksListDiv.classList.add('hidden');
+      emptyBookshelfDiv.classList.remove('hidden');
+      return;
+    }
+    
+    booksListDiv.classList.remove('hidden');
+    emptyBookshelfDiv.classList.add('hidden');
+    
+    // Sort by last read (most recent first)
+    books.sort((a, b) => b.lastReadAt - a.lastReadAt);
+    
+    books.forEach(book => {
+      const bookCard = document.createElement('div');
+      bookCard.className = 'border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer relative';
+      
+      const progress = book.progress || 0;
+      const progressPercent = Math.round(progress * 100);
+      
+      bookCard.innerHTML = `
+        <div class="flex flex-col h-full">
+          <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">${book.title}</h3>
+          <div class="text-sm text-gray-500 mb-2">
+            <p>最後閱讀: ${new Date(book.lastReadAt).toLocaleDateString('zh-TW')}</p>
+            <p>進度: ${progressPercent}%</p>
+          </div>
+          <div class="mt-auto">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-blue-600 h-2 rounded-full" style="width: ${progressPercent}%"></div>
+            </div>
+          </div>
+          <button class="delete-book absolute top-2 right-2 text-red-500 hover:text-red-700" data-id="${book.id}">
+            ✕
+          </button>
+        </div>
+      `;
+      
+      bookCard.addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-book')) {
+          e.stopPropagation();
+          deleteBookFromShelf(book.id);
+        } else {
+          openBookFromShelf(book.id);
+        }
+      });
+      
+      booksListDiv.appendChild(bookCard);
+    });
+  } catch (err) {
+    console.error('Load bookshelf failed:', err);
+    alert('載入書櫃失敗');
+  }
+}
+
+async function openBookFromShelf(id) {
+  try {
+    const book = await getBookById(id);
+    if (!book) {
+      alert('找不到這本書');
+      return;
+    }
+    
+    currentBookId = id;
+    displayBook(book.title, book.content, book);
+    bookshelfDiv.classList.add('hidden');
+  } catch (err) {
+    console.error('Open book failed:', err);
+    alert('開啟失敗');
+  }
+}
+
+async function addCurrentBookToShelf() {
+  if (!currentBook) {
+    alert('沒有開啟的書');
+    return;
+  }
+  
+  try {
+    const id = await saveBookToShelf(currentBook.title, currentBook.content);
+    currentBookId = id;
+    alert('已加入書櫃！');
+    addToShelfButton.textContent = '✓ 已在書櫃';
+    addToShelfButton.disabled = true;
+  } catch (err) {
+    console.error('Add to shelf failed:', err);
+    alert('加入失敗');
+  }
+}
+
+async function deleteBookFromShelf(id) {
+  if (!confirm('確定要從書櫃移除這本書嗎？')) return;
+  
+  try {
+    await deleteBook(id);
+    await loadBookshelf();
+  } catch (err) {
+    console.error('Delete book failed:', err);
+    alert('刪除失敗');
+  }
+}
+
+// Event listeners
+viewBookshelfButton.addEventListener('click', showBookshelf);
+closeBookshelfButton.addEventListener('click', hideBookshelf);
+addToShelfButton.addEventListener('click', addCurrentBookToShelf);
+
+// Update displayBook to handle saved books
+const originalDisplayBook = displayBook;
+function displayBook(title, content, savedBook = null) {
+  originalDisplayBook(title, content);
+  
+  if (savedBook) {
+    // Restore saved settings
+    if (savedBook.fontSize) {
+      fontSizeInput.value = savedBook.fontSize;
+      applyFontSize(savedBook.fontSize);
+    }
+    
+    if (typeof savedBook.isVertical === 'boolean') {
+      isVerticalMode = savedBook.isVertical;
+      applyReadingDirection();
+    }
+    
+    // Restore page position
+    if (savedBook.currentPage !== undefined) {
+      currentPageIndex = savedBook.currentPage;
+      renderCurrentPage();
+    }
+    
+    addToShelfButton.textContent = '✓ 已在書櫃';
+    addToShelfButton.disabled = true;
+  } else {
+    currentBookId = null;
+    addToShelfButton.textContent = '+ 書櫃';
+    addToShelfButton.disabled = false;
+  }
+}
+
+// Save progress when page changes
+const originalRenderCurrentPage = renderCurrentPage;
+function renderCurrentPage() {
+  originalRenderCurrentPage();
+  
+  if (currentBookId && currentBook) {
+    const progress = (currentPageIndex + 1) / bookPages.length;
+    updateBookProgress(
+      currentBookId,
+      progress,
+      currentPageIndex,
+      parseInt(fontSizeInput.value),
+      isVerticalMode
+    ).catch(err => console.error('Save progress failed:', err));
+  }
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PP eReader V1.0.23</title>
+  <title>PP eReader V1.1.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* Fixed viewport for reading - no scrolling */
@@ -130,9 +130,12 @@
   <header class="bg-white border-b border-gray-200">
     <div class="max-w-4xl mx-auto px-4 py-4">
       <div class="flex items-center justify-between mb-3">
-        <h1 class="text-xl font-semibold text-gray-900">PP eReader V1.0.23</h1>
+        <h1 class="text-xl font-semibold text-gray-900">PP eReader V1.1.0</h1>
         <label for="file-input" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors">
           Open File
+        <button id="view-bookshelf" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 cursor-pointer transition-colors">
+          書櫃
+        </button>
         </label>
         <input type="file" id="file-input" accept=".txt,.epub" class="hidden" />
       </div>
@@ -165,6 +168,9 @@
           
           <div class="border-l border-gray-300 h-6 mx-2"></div>
           
+          <button id="add-to-shelf" class="px-3 py-1 text-sm bg-green-600 text-white hover:bg-green-700 rounded-md transition-colors">
+            + 書櫃
+          </button>
           <button id="close-book" class="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">
             Close Book
           </button>
@@ -183,6 +189,25 @@
     </div>
 
     <div id="reader-content" class="hidden flex-1 flex flex-col">
+
+    <!-- Bookshelf -->
+    <div id="bookshelf" class="hidden p-6 overflow-y-auto">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">📚 我的書櫃</h2>
+          <button id="close-bookshelf" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors border border-gray-300">
+            關閉
+          </button>
+        </div>
+        <div id="books-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Books will be inserted here -->
+        </div>
+        <div id="empty-bookshelf" class="text-center py-16 text-gray-500">
+          <p>書櫃是空的</p>
+          <p class="text-sm mt-2">開啟檔案後點擊「+ 書櫃」加入</p>
+        </div>
+      </div>
+    </div>
       <div id="page-nav-prev" class="page-nav left">
         <button id="prev-page">
           <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
