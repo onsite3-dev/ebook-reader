@@ -86,17 +86,28 @@ function displayBook(title, content) {
 
 function calculateCharsPerPage() {
   const fontSize = parseInt(fontSizeInput.value);
+  const lineHeight = 1.8;
+  
+  // Get actual element dimensions
   const availableHeight = bookText.clientHeight || 600;
   const availableWidth = bookText.clientWidth || 800;
   
+  // Account for padding (12px on each side)
+  const usableHeight = availableHeight - 24; // 12px top + 12px bottom
+  const usableWidth = availableWidth - 24;   // 12px left + 12px right
+  
   if (isVerticalMode) {
-    const charsPerLine = Math.floor(availableHeight / (fontSize * 1.1));
-    const numColumns = Math.floor(availableWidth / (fontSize * 1.8));
-    return Math.max(Math.floor(charsPerLine * numColumns * 0.6), 200);
+    // Vertical: chars per column, number of columns
+    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.1));
+    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight));
+    // Very conservative: 50% to ensure no overflow
+    return Math.max(Math.floor(charsPerColumn * numColumns * 0.5), 150);
   } else {
-    const charsPerLine = Math.floor(availableWidth / (fontSize * 0.6));
-    const numLines = Math.floor(availableHeight / (fontSize * 1.8));
-    return Math.max(Math.floor(charsPerLine * numLines * 0.8), 500);
+    // Horizontal: chars per line, number of lines
+    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.6));
+    const numLines = Math.floor(usableHeight / (fontSize * lineHeight));
+    // Conservative: 70% to ensure no overflow
+    return Math.max(Math.floor(charsPerLine * numLines * 0.7), 400);
   }
 }
 
