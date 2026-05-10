@@ -110,33 +110,11 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: find maximum chars that fit
-    bookText.textContent = '';
-    let safeChars = 400; // Start from known good value
-    
-    // Test increasing from 400 to find max
-    const testContent = currentBook ? currentBook.content : '測試內容的文字會自動換行到下一條直線這樣才能測量出真實的容量不然只會測到單一直線的容量'.repeat(10);
-    
-    for (let chars = 400; chars <= 600; chars += 50) {
-      const testText = testContent.substring(0, chars);
-      bookText.textContent = testText;
-      
-      const fitsHeight = bookText.scrollHeight <= containerHeight * 0.80; // Extra conservative for mobile
-      const fitsWidth = bookText.scrollWidth <= containerWidth * 0.80;   // Extra conservative for left edge
-      
-      console.log(`Test ${chars} - H:${bookText.scrollHeight}/${containerHeight}(${fitsHeight}) W:${bookText.scrollWidth}/${containerWidth}(${fitsWidth})`);
-      
-      if (fitsHeight && fitsWidth) {
-        safeChars = chars;
-        console.log(`✓ ${chars} fits`);
-      } else {
-        console.log(`✗ ${chars} overflow, using ${safeChars}`);
-        break;
-      }
-    }
-    
-    bookText.textContent = '';
-    console.log('Vertical final:', safeChars);
+    // Vertical mode: use fixed safe value for reliability
+    // Measurement-based approach causes edge cutoff on mobile
+    // Trade capacity for zero cutoff guarantee
+    const safeChars = 250;
+    console.log('Vertical - using fixed safe value:', safeChars);
     return safeChars;
     
   } else {
