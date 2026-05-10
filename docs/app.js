@@ -106,8 +106,8 @@ function calculateCharsPerPage() {
     // Horizontal: chars per line, number of lines
     const charsPerLine = Math.floor(usableWidth / (fontSize * 0.65));
     const numLines = Math.floor(usableHeight / (fontSize * lineHeight));
-    // Very conservative: 60% to ensure no overflow
-    return Math.max(Math.floor(charsPerLine * numLines * 0.6), 250);
+    // Ultra-conservative: 50% to ensure last line is never cut off
+    return Math.max(Math.floor(charsPerLine * numLines * 0.5), 200);
   }
 }
 
