@@ -244,12 +244,16 @@ function displayBook(title, content, savedBook = null) {
     if (typeof savedBook.isVertical === 'boolean') savedMode = savedBook.isVertical;
     if (savedBook.currentPage !== undefined) savedPage = savedBook.currentPage;
     
-    addToShelfButton.textContent = '✓ 已在書櫃';
-    addToShelfButton.disabled = true;
+    if (typeof addToShelfButton !== 'undefined') {
+      addToShelfButton.textContent = '✓ 已在書櫃';
+      addToShelfButton.disabled = true;
+    }
   } else {
     currentBookId = null;
-    addToShelfButton.textContent = '+ 書櫃';
-    addToShelfButton.disabled = false;
+    if (typeof addToShelfButton !== 'undefined') {
+      addToShelfButton.textContent = '+ 書櫃';
+      addToShelfButton.disabled = false;
+    }
   }
   
   fontSizeInput.value = savedFontSize;
