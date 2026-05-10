@@ -229,15 +229,33 @@ function handleFileSelect(event) {
     reader.readAsText(file);
   }
 }
-function displayBook(title, content) {
+function displayBook(title, content, savedBook = null) {
   currentBook = { title, content };
   bookTitle.textContent = title;
   
-  const savedFontSize = 24;
+  // Handle saved book settings
+  let savedFontSize = 24;
+  let savedMode = loadReadingMode();
+  let savedPage = 0;
+  
+  if (savedBook) {
+    currentBookId = savedBook.id;
+    if (savedBook.fontSize) savedFontSize = savedBook.fontSize;
+    if (typeof savedBook.isVertical === 'boolean') savedMode = savedBook.isVertical;
+    if (savedBook.currentPage !== undefined) savedPage = savedBook.currentPage;
+    
+    addToShelfButton.textContent = '✓ 已在書櫃';
+    addToShelfButton.disabled = true;
+  } else {
+    currentBookId = null;
+    addToShelfButton.textContent = '+ 書櫃';
+    addToShelfButton.disabled = false;
+  }
+  
   fontSizeInput.value = savedFontSize;
   applyFontSize(savedFontSize);
   
-  isVerticalMode = loadReadingMode();
+  isVerticalMode = savedMode;
   applyReadingDirection();
   
   // Show UI first so container dimensions are correct
@@ -248,7 +266,7 @@ function displayBook(title, content) {
   // Small delay to ensure rendering is complete
   setTimeout(() => {
     paginateContent(content);
-    currentPageIndex = 0;
+    currentPageIndex = savedPage;
     renderCurrentPage();
     
     // Debug: log dimensions
@@ -359,6 +377,18 @@ function renderCurrentPage() {
     setTimeout(() => bookText.classList.remove('page-turning'), 50);
     updatePageIndicator();
     updatePageButtons();
+    
+    // Auto-save progress if book is in shelf
+    if (currentBookId && currentBook) {
+      const progress = (currentPageIndex + 1) / bookPages.length;
+      updateBookProgress(
+        currentBookId,
+        progress,
+        currentPageIndex,
+        parseInt(fontSizeInput.value),
+        isVerticalMode
+      ).catch(err => console.error('Save progress failed:', err));
+    }
   }, 150);
 }
 
@@ -700,50 +730,5 @@ closeBookshelfButton.addEventListener('click', hideBookshelf);
 addToShelfButton.addEventListener('click', addCurrentBookToShelf);
 
 // Update displayBook to handle saved books
-const originalDisplayBook = displayBook;
-function displayBook(title, content, savedBook = null) {
-  originalDisplayBook(title, content);
-  
-  if (savedBook) {
-    // Restore saved settings
-    if (savedBook.fontSize) {
-      fontSizeInput.value = savedBook.fontSize;
-      applyFontSize(savedBook.fontSize);
-    }
-    
-    if (typeof savedBook.isVertical === 'boolean') {
-      isVerticalMode = savedBook.isVertical;
-      applyReadingDirection();
-    }
-    
-    // Restore page position
-    if (savedBook.currentPage !== undefined) {
-      currentPageIndex = savedBook.currentPage;
-      renderCurrentPage();
-    }
-    
-    addToShelfButton.textContent = '✓ 已在書櫃';
-    addToShelfButton.disabled = true;
-  } else {
-    currentBookId = null;
-    addToShelfButton.textContent = '+ 書櫃';
-    addToShelfButton.disabled = false;
-  }
-}
 
 // Save progress when page changes
-const originalRenderCurrentPage = renderCurrentPage;
-function renderCurrentPage() {
-  originalRenderCurrentPage();
-  
-  if (currentBookId && currentBook) {
-    const progress = (currentPageIndex + 1) / bookPages.length;
-    updateBookProgress(
-      currentBookId,
-      progress,
-      currentPageIndex,
-      parseInt(fontSizeInput.value),
-      isVerticalMode
-    ).catch(err => console.error('Save progress failed:', err));
-  }
-}
