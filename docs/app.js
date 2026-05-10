@@ -101,31 +101,33 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // For vertical: do actual measurement test
-    // Start with small amount and measure if it fits
-    const testText = '測'.repeat(100); // 100 chars of test text
-    bookText.textContent = testText;
+    // For vertical: iteratively find safe char count
+    let testCount = 100;
+    let safeCount = 30; // minimum fallback
     
-    const testHeight = bookText.scrollHeight;
-    const testWidth = bookText.scrollWidth;
-    
-    console.log('Test 100 chars - scrollHeight:', testHeight, 'scrollWidth:', testWidth);
-    console.log('Container can fit - height?', testHeight <= containerHeight, 'width?', testWidth <= containerWidth);
-    
-    // Calculate how many times 100 chars fits
-    let fits = 1;
-    if (testHeight <= containerHeight && testWidth <= containerWidth) {
-      // 100 chars fits, try to estimate capacity
-      const heightRatio = containerHeight / testHeight;
-      const widthRatio = containerWidth / testWidth;
-      fits = Math.floor(Math.min(heightRatio, widthRatio) * 0.8); // 80% of theoretical max
+    // Try decreasing amounts until it fits
+    for (let test = 100; test >= 20; test -= 20) {
+      const testText = '測'.repeat(test);
+      bookText.textContent = testText;
+      
+      const testHeight = bookText.scrollHeight;
+      const testWidth = bookText.scrollWidth;
+      
+      const fitsHeight = testHeight <= containerHeight * 0.9;
+      const fitsWidth = testWidth <= containerWidth * 0.9;
+      
+      console.log(`Test ${test} chars - H:${testHeight}(${fitsHeight}) W:${testWidth}(${fitsWidth})`);
+      
+      if (fitsHeight && fitsWidth) {
+        // This amount fits! Use 80% of it to be safe
+        safeCount = Math.floor(test * 0.8);
+        console.log(`✓ ${test} chars fit, using 80% = ${safeCount}`);
+        break;
+      }
     }
     
-    const total = Math.max(fits * 100, 50);
-    console.log('Vertical - fits:', fits, 'x 100 =', total, 'chars');
-    
     bookText.textContent = ''; // Clear test
-    return total;
+    return Math.max(safeCount, 20);
     
   } else {
     // Horizontal mode - existing calculation works fine
