@@ -33,9 +33,7 @@
       height: 100%;
       width: 100%;
       overflow: hidden;
-      padding: 0; /* No padding - parent container has padding */
-      white-space: pre-wrap;
-      word-wrap: break-word;
+      padding: 0;
       color: #1f2937;
       line-height: 1.8;
       font-size: 24px;
@@ -54,13 +52,16 @@
     
     #book-text.horizontal {
       writing-mode: horizontal-tb;
-      white-space: pre-wrap; /* Preserve spaces and newlines */
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
     
     #book-text.vertical {
       writing-mode: vertical-rl;
       text-orientation: upright;
-      white-space: normal; /* Allow wrapping to next vertical line */
+      white-space: normal;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
     
     .page-nav {
