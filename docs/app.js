@@ -110,23 +110,26 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: measure actual rendering to find safe char count
+    // Vertical mode: find MAXIMUM chars that fit (not minimum)
     bookText.textContent = ''; // Start clean
-    let safeChars = 20; // minimum fallback
+    let safeChars = 30; // fallback
     
-    // Test decreasing amounts to find what actually fits
-    for (let chars = 50; chars >= 10; chars -= 10) {
+    // Test INCREASING amounts to find maximum that fits
+    for (let chars = 50; chars <= 200; chars += 30) {
       const testText = '測'.repeat(chars);
       bookText.textContent = testText;
       
       const fitsHeight = bookText.scrollHeight <= containerHeight * 0.95;
       const fitsWidth = bookText.scrollWidth <= containerWidth * 0.95;
       
-      console.log(`Test ${chars} chars - scrollH:${bookText.scrollHeight} scrollW:${bookText.scrollWidth} fits: H=${fitsHeight} W=${fitsWidth}`);
+      console.log(`Test ${chars} chars - scrollH:${bookText.scrollHeight}/${containerHeight} scrollW:${bookText.scrollWidth}/${containerWidth} fits: H=${fitsHeight} W=${fitsWidth}`);
       
       if (fitsHeight && fitsWidth) {
-        safeChars = chars;
-        console.log(`✓ ${chars} chars fit!`);
+        safeChars = chars; // Keep going, try more
+        console.log(`✓ ${chars} chars fit, trying more...`);
+      } else {
+        // Overflowed, use previous value
+        console.log(`✗ ${chars} chars overflow, using ${safeChars}`);
         break;
       }
     }
