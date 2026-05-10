@@ -5,6 +5,9 @@ const STORE_NAME = 'books';
 
 let db = null;
 
+
+// Bookshelf UI state
+let currentBookId = null;
 async function initDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -596,10 +599,6 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', setupS2TButton);
 } else {
   setupS2TButton();
-}
-
-// Bookshelf UI functions
-let currentBookId = null;
 
 const viewBookshelfButton = document.getElementById('view-bookshelf');
 const closeBookshelfButton = document.getElementById('close-bookshelf');
