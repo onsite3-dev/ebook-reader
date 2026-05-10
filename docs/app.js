@@ -110,11 +110,24 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: use FIXED safe value
-    // Even 30 chars can overflow on some screens, use smaller value
-    const safeChars = 20;
-    console.log('Vertical - using fixed safe value:', safeChars);
-    return safeChars;
+    // Vertical mode: same measurement logic as horizontal, but dimensions swapped
+    // In vertical mode:
+    // - Height = how long each vertical line is (like horizontal line length)
+    // - Width = how many vertical lines fit (like horizontal number of lines)
+    
+    const usableHeight = Math.floor(containerHeight * 0.70); // 70% of height
+    const usableWidth = Math.floor(containerWidth * 0.70);   // 70% of width (more conservative)
+    
+    // Each vertical line runs top-to-bottom
+    const charsPerVerticalLine = Math.floor(usableHeight / (fontSize * 1.2));
+    
+    // Number of vertical lines that fit left-to-right
+    const numVerticalLines = Math.floor(usableWidth / (fontSize * lineHeight * 1.2));
+    
+    const total = Math.max(charsPerVerticalLine * numVerticalLines, 50);
+    
+    console.log('Vertical - chars/line:', charsPerVerticalLine, 'lines:', numVerticalLines, 'total:', total);
+    return total;
     
   } else {
     // Horizontal mode - existing calculation works fine
