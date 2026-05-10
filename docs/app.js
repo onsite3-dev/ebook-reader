@@ -122,7 +122,7 @@ function calculateCharsPerPage() {
     const baseChars = charsPerLine * numLines;
     
     // Reserve 2 lines at bottom for mobile toolbar
-    const reserveLines = 2;
+    const reserveLines = 3;
     const safeChars = charsPerLine * (numLines - reserveLines);
     
     console.log('Vertical - chars/line:', charsPerLine, 'total lines:', numLines, 'reserve:', reserveLines, 'final:', safeChars);
@@ -138,7 +138,7 @@ function calculateCharsPerPage() {
     const charsPerLine = Math.floor(usableWidth / (fontSize * 0.8));
     
     // Reserve 2 lines at bottom for mobile toolbar
-    const reserveLines = 2;
+    const reserveLines = 3;
     const displayLines = Math.max(numLines - reserveLines, 3);
     const total = Math.max(displayLines * charsPerLine, 50);
     
