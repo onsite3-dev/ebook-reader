@@ -92,68 +92,33 @@ function calculateCharsPerPage() {
   const availableHeight = bookText.clientHeight || 600;
   const availableWidth = bookText.clientWidth || 800;
   
-  // Calculate usable space with generous bottom margin
-  const usableHeight = availableHeight - 80; // Extra margin for safety
-  const usableWidth = availableWidth - 24;
+  // Account for padding (16px from parent container)
+  const usableHeight = availableHeight - 80; // Extra safety margin
+  const usableWidth = availableWidth - 32;   // Extra safety margin
   
   if (isVerticalMode) {
     // Vertical: calculate columns and chars per column
-    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.25));
-    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight * 1.1));
-    // Ultra-conservative for vertical
-    return Math.max(Math.floor(charsPerColumn * numColumns * 0.35), 80);
+    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.3));
+    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight * 1.2));
+    // Extremely conservative: 25%
+    return Math.max(Math.floor(charsPerColumn * numColumns * 0.25), 50);
   } else {
-    // Horizontal: calculate exact number of lines that fit
+    // Horizontal: calculate lines and chars per line
     const lineHeightPx = fontSize * lineHeight;
     const numLines = Math.floor(usableHeight / lineHeightPx);
-    
-    // Calculate chars per line (average Chinese char width ~= fontSize * 0.65)
-    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.7));
-    
-    // Total chars = lines * chars per line, with 40% safety margin
-    return Math.max(Math.floor(numLines * charsPerLine * 0.4), 150);
+    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.75));
+    // Extremely conservative: 30%
+    return Math.max(Math.floor(numLines * charsPerLine * 0.30), 100);
   }
 }
 
 function paginateContent(content) {
   bookPages = [];
-  let remainingContent = content;
+  const charsPerPage = calculateCharsPerPage();
   
-  // Initial guess for chars per page
-  let charsPerPage = calculateCharsPerPage();
-  
-  while (remainingContent.length > 0) {
-    // Try with current estimate
-    let testContent = remainingContent.substring(0, charsPerPage);
-    
-    // Render it temporarily to measure actual height
-    bookText.textContent = testContent;
-    
-    // Get dimensions
-    const availableHeight = bookText.clientHeight;
-    const safeHeight = availableHeight * 0.92; // Use 92% (8% bottom margin)
-    
-    // Iteratively reduce until it fits
-    let iterations = 0;
-    while (bookText.scrollHeight > safeHeight && testContent.length > 10 && iterations < 20) {
-      charsPerPage = Math.floor(charsPerPage * 0.92); // Reduce by 8%
-      testContent = remainingContent.substring(0, charsPerPage);
-      bookText.textContent = testContent;
-      iterations++;
-    }
-    
-    // Save this page
-    if (testContent.length > 0) {
-      bookPages.push(testContent);
-      remainingContent = remainingContent.substring(testContent.length);
-    } else {
-      // Prevent infinite loop - force at least 1 char
-      bookPages.push(remainingContent.substring(0, 1));
-      remainingContent = remainingContent.substring(1);
-    }
+  for (let i = 0; i < content.length; i += charsPerPage) {
+    bookPages.push(content.substring(i, i + charsPerPage));
   }
-  
-  bookText.textContent = ''; // Clear test content
 }
 
 function renderCurrentPage() {
