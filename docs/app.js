@@ -107,12 +107,16 @@ function calculateCharsPerPage() {
   console.log('Usable:', usableHeight, 'x', usableWidth);
   
   if (isVerticalMode) {
-    // Vertical mode is VERY unreliable - use ultra-conservative fixed ratio
-    // Based on testing: clientHeight doesn't match actual vertical space
-    const estimatedChars = Math.floor((usableHeight * usableWidth) / (fontSize * fontSize * 3.5));
-    const total = Math.max(Math.floor(estimatedChars * 0.15), 50); // Only 15% of estimate!
-    console.log('Vertical - estimated:', estimatedChars, 'using 15%:', total);
-    return total;
+    // Vertical mode: use FIXED safe value regardless of screen size
+    // Writing-mode calculation is completely unreliable
+    const fontSize = parseInt(fontSizeInput.value);
+    
+    // Safe formula based on font size only
+    // Larger font = fewer chars that fit
+    const safeChars = Math.max(Math.floor(2000 / fontSize), 30);
+    
+    console.log('Vertical - fontSize:', fontSize, 'safe chars:', safeChars);
+    return safeChars;
   } else {
     // Horizontal: lines (top to bottom)
     const lineHeightPx = fontSize * lineHeight;
