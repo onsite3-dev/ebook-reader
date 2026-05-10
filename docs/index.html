@@ -30,17 +30,17 @@
     }
     
     #book-text {
-      height: 100%; /* Fill parent container */
+      height: 100%;
       width: 100%;
       overflow: hidden;
-      padding: 16px 16px 16px 16px; /* Minimal and symmetric padding */
+      padding: 0; /* No padding - parent container has padding */
       white-space: pre-wrap;
       word-wrap: break-word;
       color: #1f2937;
       line-height: 1.8;
       font-size: 24px;
       transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-      box-sizing: border-box; /* Include padding in height calculation */
+      box-sizing: border-box;
     }
     
     #book-text.page-turning {
@@ -183,9 +183,9 @@
         </button>
       </div>
       
-      <div class="flex-1 flex flex-col overflow-hidden">
-        <h2 id="book-title" class="text-lg font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200 flex-shrink-0 px-4"></h2>
-        <div id="book-text" class="flex-1"></div>
+      <div class="flex-1 flex flex-col overflow-hidden" style="padding: 16px;">
+        <h2 id="book-title" class="text-lg font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200 flex-shrink-0"></h2>
+        <div id="book-text" class="flex-1" style="padding: 0;"></div>
       </div>
     </div>
   </main>
