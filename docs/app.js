@@ -92,22 +92,26 @@ function calculateCharsPerPage() {
   const availableHeight = bookText.clientHeight || 600;
   const availableWidth = bookText.clientWidth || 800;
   
-  // Account for padding (12px on each side) + extra safety margin
-  const usableHeight = availableHeight - 60; // Conservative: more bottom margin
-  const usableWidth = availableWidth - 24;   // 12px left + 12px right
+  // Calculate usable space with generous bottom margin
+  const usableHeight = availableHeight - 80; // Extra margin for safety
+  const usableWidth = availableWidth - 24;
   
   if (isVerticalMode) {
-    // Vertical: chars per column, number of columns
-    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.2));
-    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight));
-    // Very conservative: 40% to ensure no overflow
-    return Math.max(Math.floor(charsPerColumn * numColumns * 0.4), 100);
+    // Vertical: calculate columns and chars per column
+    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.25));
+    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight * 1.1));
+    // Ultra-conservative for vertical
+    return Math.max(Math.floor(charsPerColumn * numColumns * 0.35), 80);
   } else {
-    // Horizontal: chars per line, number of lines
-    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.65));
-    const numLines = Math.floor(usableHeight / (fontSize * lineHeight));
-    // Ultra-conservative: 50% to ensure last line is never cut off
-    return Math.max(Math.floor(charsPerLine * numLines * 0.5), 200);
+    // Horizontal: calculate exact number of lines that fit
+    const lineHeightPx = fontSize * lineHeight;
+    const numLines = Math.floor(usableHeight / lineHeightPx);
+    
+    // Calculate chars per line (average Chinese char width ~= fontSize * 0.65)
+    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.7));
+    
+    // Total chars = lines * chars per line, with 40% safety margin
+    return Math.max(Math.floor(numLines * charsPerLine * 0.4), 150);
   }
 }
 
