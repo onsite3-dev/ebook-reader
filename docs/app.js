@@ -137,7 +137,9 @@ function paginateContent(content) {
   const charsPerPage = calculateCharsPerPage();
   
   // For vertical mode: overlap pages to handle bottom cutoff
-  const overlap = isVerticalMode ? 30 : 0; // Overlap 30 chars (~1 line) in vertical mode
+  const overlap = isVerticalMode ? 50 : 0; // Overlap 50 chars (~2 lines) in vertical mode
+  
+  console.log('Pagination - mode:', isVerticalMode ? 'vertical' : 'horizontal', 'chars/page:', charsPerPage, 'overlap:', overlap);
   
   let i = 0;
   while (i < content.length) {
@@ -145,6 +147,8 @@ function paginateContent(content) {
     bookPages.push(content.substring(i, end));
     i += charsPerPage - overlap; // Move forward, minus overlap
   }
+  
+  console.log('Total pages:', bookPages.length);
 }
 
 function renderCurrentPage() {
