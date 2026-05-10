@@ -107,12 +107,11 @@ function calculateCharsPerPage() {
   console.log('Usable:', usableHeight, 'x', usableWidth);
   
   if (isVerticalMode) {
-    // Vertical: columns (right to left)
-    // Use much more conservative calculation
-    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.6)); // Wider spacing
-    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight * 1.5)); // Wider columns
-    const total = Math.max(Math.floor(charsPerColumn * numColumns * 0.6), 20); // Only 60% capacity
-    console.log('Vertical - chars/col:', charsPerColumn, 'columns:', numColumns, 'total:', total);
+    // Vertical mode is VERY unreliable - use ultra-conservative fixed ratio
+    // Based on testing: clientHeight doesn't match actual vertical space
+    const estimatedChars = Math.floor((usableHeight * usableWidth) / (fontSize * fontSize * 3.5));
+    const total = Math.max(Math.floor(estimatedChars * 0.15), 50); // Only 15% of estimate!
+    console.log('Vertical - estimated:', estimatedChars, 'using 15%:', total);
     return total;
   } else {
     // Horizontal: lines (top to bottom)
