@@ -118,7 +118,6 @@ function calculateCharsPerPage() {
 function paginateContent(content) {
   bookPages = [];
   let remainingContent = content;
-  let startIndex = 0;
   
   // Initial guess for chars per page
   let charsPerPage = calculateCharsPerPage();
@@ -130,28 +129,28 @@ function paginateContent(content) {
     // Render it temporarily to measure actual height
     bookText.textContent = testContent;
     
-    // Get actual rendered height with reasonable safety margin
-    const renderedHeight = bookText.scrollHeight;
+    // Get dimensions
     const availableHeight = bookText.clientHeight;
-    const safeHeight = availableHeight * 0.90; // Use 90% of available height (10% bottom margin)
+    const safeHeight = availableHeight * 0.92; // Use 92% (8% bottom margin)
     
-    // If content overflows safe zone, reduce it
-    while (renderedHeight > safeHeight && testContent.length > 10) {
-      charsPerPage = Math.floor(charsPerPage * 0.90); // Reduce by 10%
+    // Iteratively reduce until it fits
+    let iterations = 0;
+    while (bookText.scrollHeight > safeHeight && testContent.length > 10 && iterations < 20) {
+      charsPerPage = Math.floor(charsPerPage * 0.92); // Reduce by 8%
       testContent = remainingContent.substring(0, charsPerPage);
       bookText.textContent = testContent;
-      // Re-measure after change
-      const newHeight = bookText.scrollHeight;
-      if (newHeight <= safeHeight) break;
+      iterations++;
     }
     
     // Save this page
-    bookPages.push(testContent);
-    remainingContent = remainingContent.substring(testContent.length);
-    startIndex += testContent.length;
-    
-    // Prevent infinite loop
-    if (testContent.length === 0) break;
+    if (testContent.length > 0) {
+      bookPages.push(testContent);
+      remainingContent = remainingContent.substring(testContent.length);
+    } else {
+      // Prevent infinite loop - force at least 1 char
+      bookPages.push(remainingContent.substring(0, 1));
+      remainingContent = remainingContent.substring(1);
+    }
   }
   
   bookText.textContent = ''; // Clear test content
