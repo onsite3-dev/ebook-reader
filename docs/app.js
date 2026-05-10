@@ -110,26 +110,28 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: find MAXIMUM chars that fit (not minimum)
+    // Vertical mode: test with real content to get accurate wrapping
     bookText.textContent = ''; // Start clean
     let safeChars = 30; // fallback
     
-    // Test INCREASING amounts to find maximum that fits
-    for (let chars = 50; chars <= 200; chars += 30) {
-      const testText = '測'.repeat(chars);
+    // Use actual content for testing (wraps naturally)
+    const testContent = currentBook ? currentBook.content : '測試內容的文字會自動換行到下一條直線這樣才能測量出真實的容量不然只會測到單一直線的容量'.repeat(3);
+    
+    // Test INCREASING amounts
+    for (let chars = 50; chars <= 300; chars += 50) {
+      const testText = testContent.substring(0, chars);
       bookText.textContent = testText;
       
       const fitsHeight = bookText.scrollHeight <= containerHeight * 0.95;
       const fitsWidth = bookText.scrollWidth <= containerWidth * 0.95;
       
-      console.log(`Test ${chars} chars - scrollH:${bookText.scrollHeight}/${containerHeight} scrollW:${bookText.scrollWidth}/${containerWidth} fits: H=${fitsHeight} W=${fitsWidth}`);
+      console.log(`Test ${chars} chars - H:${bookText.scrollHeight}/${containerHeight}(${fitsHeight}) W:${bookText.scrollWidth}/${containerWidth}(${fitsWidth})`);
       
       if (fitsHeight && fitsWidth) {
-        safeChars = chars; // Keep going, try more
-        console.log(`✓ ${chars} chars fit, trying more...`);
+        safeChars = chars;
+        console.log(`✓ ${chars} chars fit`);
       } else {
-        // Overflowed, use previous value
-        console.log(`✗ ${chars} chars overflow, using ${safeChars}`);
+        console.log(`✗ ${chars} overflow, using ${safeChars}`);
         break;
       }
     }
