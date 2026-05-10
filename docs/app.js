@@ -1,4 +1,4 @@
-// Simple eBook Reader - Working version
+// Debug version - let's see what's actually happening
 
 let currentBook = null;
 let isVerticalMode = false;
@@ -82,6 +82,12 @@ function displayBook(title, content) {
   emptyState.classList.add('hidden');
   readerContent.classList.remove('hidden');
   headerControls.classList.remove('hidden');
+  
+  // Debug: log dimensions
+  console.log('Container clientHeight:', bookText.clientHeight);
+  console.log('Container clientWidth:', bookText.clientWidth);
+  console.log('Chars per page:', calculateCharsPerPage());
+  console.log('Total pages:', bookPages.length);
 }
 
 function calculateCharsPerPage() {
@@ -92,23 +98,29 @@ function calculateCharsPerPage() {
   const availableHeight = bookText.clientHeight || 600;
   const availableWidth = bookText.clientWidth || 800;
   
-  // Account for padding (16px from parent container)
-  const usableHeight = availableHeight - 80; // Extra safety margin
-  const usableWidth = availableWidth - 32;   // Extra safety margin
+  // Use only a fraction of available space - ULTRA conservative
+  // The parent div has 16px padding, we need to account for that
+  const usableHeight = Math.floor(availableHeight * 0.70); // Only use 70% of height
+  const usableWidth = Math.floor(availableWidth * 0.90);   // Only use 90% of width
+  
+  console.log('Available:', availableHeight, 'x', availableWidth);
+  console.log('Usable:', usableHeight, 'x', usableWidth);
   
   if (isVerticalMode) {
-    // Vertical: calculate columns and chars per column
-    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.3));
-    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight * 1.2));
-    // Extremely conservative: 25%
-    return Math.max(Math.floor(charsPerColumn * numColumns * 0.25), 50);
+    // Vertical: columns (right to left)
+    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.4));
+    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight * 1.3));
+    const total = Math.max(charsPerColumn * numColumns, 30);
+    console.log('Vertical - chars/col:', charsPerColumn, 'columns:', numColumns, 'total:', total);
+    return total;
   } else {
-    // Horizontal: calculate lines and chars per line
+    // Horizontal: lines (top to bottom)
     const lineHeightPx = fontSize * lineHeight;
-    const numLines = Math.floor(usableHeight / lineHeightPx);
-    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.75));
-    // Extremely conservative: 30%
-    return Math.max(Math.floor(numLines * charsPerLine * 0.30), 100);
+    const numLines = Math.floor(usableHeight / (lineHeightPx * 1.2));
+    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.8));
+    const total = Math.max(numLines * charsPerLine, 50);
+    console.log('Horizontal - lines:', numLines, 'chars/line:', charsPerLine, 'total:', total);
+    return total;
   }
 }
 
