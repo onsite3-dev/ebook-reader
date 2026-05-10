@@ -67,6 +67,11 @@
       transform: translateY(-50%);
       z-index: 10;
       transition: opacity 0.3s;
+      opacity: 0.15; /* Semi-transparent by default */
+    }
+    
+    .page-nav:hover {
+      opacity: 1; /* Full opacity on hover */
     }
     
     body.vertical-reading .page-nav {

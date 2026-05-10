@@ -108,9 +108,10 @@ function calculateCharsPerPage() {
   
   if (isVerticalMode) {
     // Vertical: columns (right to left)
-    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.4));
-    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight * 1.3));
-    const total = Math.max(charsPerColumn * numColumns, 30);
+    // Use much more conservative calculation
+    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.6)); // Wider spacing
+    const numColumns = Math.floor(usableWidth / (fontSize * lineHeight * 1.5)); // Wider columns
+    const total = Math.max(Math.floor(charsPerColumn * numColumns * 0.6), 20); // Only 60% capacity
     console.log('Vertical - chars/col:', charsPerColumn, 'columns:', numColumns, 'total:', total);
     return total;
   } else {
