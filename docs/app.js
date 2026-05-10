@@ -370,3 +370,29 @@ function saveReadingMode() {
     localStorage.setItem(READING_MODE_KEY, isVerticalMode ? 'vertical' : 'horizontal');
   } catch (e) {}
 }
+
+// Simplified to Traditional Chinese conversion
+let isSimplified = true;
+const toggleS2TButton = document.getElementById('toggle-s2t');
+
+toggleS2TButton.addEventListener('click', () => {
+  if (!currentBook) return;
+  
+  isSimplified = !isSimplified;
+  
+  if (isSimplified) {
+    // Already in original form, just re-paginate
+    toggleS2TButton.textContent = '簡→繁';
+  } else {
+    // Convert to Traditional Chinese
+    toggleS2TButton.textContent = '繁→簡';
+    const converter = OpenCC.Converter({ from: 'cn', to: 'tw' });
+    currentBook.content = converter(currentBook.content);
+  }
+  
+  // Re-paginate with converted content
+  const currentPosition = getCurrentCharPosition();
+  paginateContent(currentBook.content);
+  restoreReadingPosition(currentPosition);
+  renderCurrentPage();
+});
