@@ -92,6 +92,10 @@ function displayBook(title, content) {
     console.log('Chars per page:', calculateCharsPerPage());
     console.log('Total pages:', bookPages.length);
     console.log('Content length:', content.length);
+    
+    // Debug: show on screen for iPad
+    const debugInfo = `📊 Debug: ${content.length} 字 / ${bookPages.length} 頁 / 每頁 ${Math.floor(content.length / bookPages.length)} 字`;
+    bookTitle.textContent = `${title} | ${debugInfo}`;
   }, 100);
 }
 
