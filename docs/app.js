@@ -110,22 +110,25 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: same measurement logic as horizontal, but dimensions swapped
-    // In vertical mode:
-    // - Height = how long each vertical line is (like horizontal line length)
-    // - Width = how many vertical lines fit (like horizontal number of lines)
+    // Vertical mode: account for padding and title
+    // Parent has 16px padding on all sides = 32px total each dimension
+    // Title also takes vertical space
     
-    const usableHeight = Math.floor(containerHeight * 0.70); // 70% of height
-    const usableWidth = Math.floor(containerWidth * 0.70);   // 70% of width (more conservative)
+    const paddingOffset = 32; // 16px × 2
+    const titleOffset = 50;   // Approximate title height
+    
+    const usableHeight = Math.floor((containerHeight - paddingOffset - titleOffset) * 0.60); // Very conservative 60%
+    const usableWidth = Math.floor((containerWidth - paddingOffset) * 0.60);   // Very conservative 60%
     
     // Each vertical line runs top-to-bottom
-    const charsPerVerticalLine = Math.floor(usableHeight / (fontSize * 1.2));
+    const charsPerVerticalLine = Math.floor(usableHeight / (fontSize * 1.3));
     
     // Number of vertical lines that fit left-to-right
-    const numVerticalLines = Math.floor(usableWidth / (fontSize * lineHeight * 1.2));
+    const numVerticalLines = Math.floor(usableWidth / (fontSize * lineHeight * 1.3));
     
     const total = Math.max(charsPerVerticalLine * numVerticalLines, 50);
     
+    console.log('Vertical - usable:', usableHeight, 'x', usableWidth);
     console.log('Vertical - chars/line:', charsPerVerticalLine, 'lines:', numVerticalLines, 'total:', total);
     return total;
     
