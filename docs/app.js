@@ -117,10 +117,40 @@ function calculateCharsPerPage() {
 
 function paginateContent(content) {
   bookPages = [];
-  const charsPerPage = calculateCharsPerPage();
-  for (let i = 0; i < content.length; i += charsPerPage) {
-    bookPages.push(content.substring(i, i + charsPerPage));
+  let remainingContent = content;
+  let startIndex = 0;
+  
+  // Initial guess for chars per page
+  let charsPerPage = calculateCharsPerPage();
+  
+  while (remainingContent.length > 0) {
+    // Try with current estimate
+    let testContent = remainingContent.substring(0, charsPerPage);
+    
+    // Render it temporarily to measure actual height
+    bookText.textContent = testContent;
+    
+    // Get actual rendered height
+    const renderedHeight = bookText.scrollHeight;
+    const availableHeight = bookText.clientHeight;
+    
+    // If content overflows, reduce it
+    while (renderedHeight > availableHeight && testContent.length > 10) {
+      charsPerPage = Math.floor(charsPerPage * 0.9); // Reduce by 10%
+      testContent = remainingContent.substring(0, charsPerPage);
+      bookText.textContent = testContent;
+    }
+    
+    // Save this page
+    bookPages.push(testContent);
+    remainingContent = remainingContent.substring(testContent.length);
+    startIndex += testContent.length;
+    
+    // Prevent infinite loop
+    if (testContent.length === 0) break;
   }
+  
+  bookText.textContent = ''; // Clear test content
 }
 
 function renderCurrentPage() {
