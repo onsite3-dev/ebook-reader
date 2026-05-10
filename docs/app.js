@@ -92,22 +92,22 @@ function calculateCharsPerPage() {
   const availableHeight = bookText.clientHeight || 600;
   const availableWidth = bookText.clientWidth || 800;
   
-  // Account for padding (12px on each side)
-  const usableHeight = availableHeight - 24; // 12px top + 12px bottom
+  // Account for padding (12px on each side) + extra safety margin
+  const usableHeight = availableHeight - 60; // Conservative: more bottom margin
   const usableWidth = availableWidth - 24;   // 12px left + 12px right
   
   if (isVerticalMode) {
     // Vertical: chars per column, number of columns
-    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.1));
+    const charsPerColumn = Math.floor(usableHeight / (fontSize * 1.2));
     const numColumns = Math.floor(usableWidth / (fontSize * lineHeight));
-    // Very conservative: 50% to ensure no overflow
-    return Math.max(Math.floor(charsPerColumn * numColumns * 0.5), 150);
+    // Very conservative: 40% to ensure no overflow
+    return Math.max(Math.floor(charsPerColumn * numColumns * 0.4), 100);
   } else {
     // Horizontal: chars per line, number of lines
-    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.6));
+    const charsPerLine = Math.floor(usableWidth / (fontSize * 0.65));
     const numLines = Math.floor(usableHeight / (fontSize * lineHeight));
-    // Conservative: 70% to ensure no overflow
-    return Math.max(Math.floor(charsPerLine * numLines * 0.7), 400);
+    // Very conservative: 60% to ensure no overflow
+    return Math.max(Math.floor(charsPerLine * numLines * 0.6), 250);
   }
 }
 
