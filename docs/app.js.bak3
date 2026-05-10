@@ -374,37 +374,21 @@ function saveReadingMode() {
 // Simplified to Traditional Chinese conversion
 let originalContent = null;
 let isConverted = false;
-let converter = null;
+
+async function initOpenCC() {
+  if (typeof OpenCC === 'undefined') {
+    console.error('OpenCC not loaded');
+    return null;
+  }
+  return OpenCC.Converter({ from: 'cn', to: 'tw' });
+}
 
 function setupS2TButton() {
   const toggleS2TButton = document.getElementById('toggle-s2t');
-  if (!toggleS2TButton) {
-    console.log('S2T button not found');
-    return;
-  }
+  if (!toggleS2TButton) return;
   
-  // Initialize converter when available
-  if (typeof OpenCC !== 'undefined') {
-    try {
-      converter = OpenCC.Converter({ from: 'cn', to: 'tw' });
-      console.log('OpenCC converter initialized');
-    } catch (e) {
-      console.error('OpenCC init failed:', e);
-    }
-  } else {
-    console.error('OpenCC not loaded');
-  }
-  
-  toggleS2TButton.addEventListener('click', () => {
-    if (!currentBook) {
-      alert('請先開啟檔案');
-      return;
-    }
-    
-    if (!converter) {
-      alert('OpenCC 未載入');
-      return;
-    }
+  toggleS2TButton.addEventListener('click', async () => {
+    if (!currentBook) return;
     
     if (!originalContent) {
       originalContent = currentBook.content;
@@ -414,20 +398,24 @@ function setupS2TButton() {
     
     if (isConverted) {
       toggleS2TButton.textContent = '繁→簡';
+      toggleS2TButton.disabled = true;
+      
       try {
-        currentBook.content = converter(originalContent);
-        console.log('Converted to Traditional');
+        const converter = await initOpenCC();
+        if (converter) {
+          currentBook.content = converter(originalContent);
+        }
       } catch (e) {
         console.error('Conversion failed:', e);
-        alert('轉換失敗: ' + e.message);
+        alert('轉換失敗');
         isConverted = false;
         toggleS2TButton.textContent = '簡→繁';
-        return;
       }
+      
+      toggleS2TButton.disabled = false;
     } else {
       toggleS2TButton.textContent = '簡→繁';
       currentBook.content = originalContent;
-      console.log('Restored to original');
     }
     
     const currentPosition = getCurrentCharPosition();
@@ -435,8 +423,6 @@ function setupS2TButton() {
     restoreReadingPosition(currentPosition);
     renderCurrentPage();
   });
-  
-  console.log('S2T button setup complete');
 }
 
 if (document.readyState === 'loading') {
