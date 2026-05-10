@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eBook Reader</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Fixed viewport for reading - no scrolling */
+    body {
+      overflow: hidden;
+    }
+    
+    #book-text {
+      height: calc(100vh - 300px);
+      width: 100%;
+      overflow: hidden;
+      padding: 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #1f2937;
+      line-height: 1.8;
+      font-size: 24px;
+      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    
+    #book-text.page-turning {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    
+    #book-text.page-turning.vertical {
+      transform: translateX(10px);
+    }
+    
+    #book-text.horizontal {
+      writing-mode: horizontal-tb;
+    }
+    
+    #book-text.vertical {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+    }
+    
+    .page-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      transition: opacity 0.3s;
+    }
+    
+    body.vertical-reading .page-nav {
+      opacity: 0;
+    }
+    
+    body.vertical-reading:hover .page-nav {
+      opacity: 0.3;
+      pointer-events: auto;
+    }
+    
+    body.vertical-reading .page-nav:hover {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .page-nav.left {
+      left: -60px;
+    }
+    
+    .page-nav.right {
+      right: -60px;
+    }
+    
+    .page-nav button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: white;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .page-nav button:hover:not(:disabled) {
+      background: #f9fafb;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .page-nav button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-4xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between mb-3">
+        <h1 class="text-xl font-semibold text-gray-900">eBook Reader</h1>
+        <label for="file-input" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors">
+          Open File
+        </label>
+        <input type="file" id="file-input" accept=".txt" class="hidden" />
+      </div>
+      
+      <div id="header-controls" class="hidden flex items-center justify-between pt-3 border-t border-gray-100">
+        <div class="flex items-center gap-4">
+          <label for="font-size" class="text-sm font-medium text-gray-700">Font Size:</label>
+          <input type="range" id="font-size" min="12" max="48" value="24" class="w-32" />
+          <span id="font-size-value" class="text-sm text-gray-600">24px</span>
+          
+          <div class="border-l border-gray-300 h-6 mx-2"></div>
+          
+          <button id="toggle-direction" class="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors border border-gray-300">
+            直排
+          </button>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="first-page" class="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors">
+            ⏮️
+          </button>
+          <span id="page-indicator" class="text-sm text-gray-600 cursor-pointer hover:text-blue-600">1 / 1</span>
+          <button id="last-page" class="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors">
+            ⏭️
+          </button>
+          
+          <div class="border-l border-gray-300 h-6 mx-2"></div>
+          
+          <button id="close-book" class="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">
+            Close Book
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-8 relative">
+    <div id="empty-state" class="text-center py-16">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+      <h2 class="mt-4 text-lg font-medium text-gray-900">No book open</h2>
+      <p class="mt-2 text-sm text-gray-500">Upload a TXT file to start reading</p>
+    </div>
+
+    <div id="reader-content" class="hidden">
+      <div id="page-nav-prev" class="page-nav left">
+        <button id="prev-page">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+      </div>
+      <div id="page-nav-next" class="page-nav right">
+        <button id="next-page">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <h2 id="book-title" class="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-200"></h2>
+        <div id="book-text"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
