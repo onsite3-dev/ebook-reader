@@ -110,27 +110,30 @@ function calculateCharsPerPage() {
   console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: account for padding and title
-    // Parent has 16px padding on all sides = 32px total each dimension
-    // Title also takes vertical space
+    // Vertical mode: measure actual rendering to find safe char count
+    bookText.textContent = ''; // Start clean
+    let safeChars = 20; // minimum fallback
     
-    const paddingOffset = 32; // 16px × 2
-    const titleOffset = 50;   // Approximate title height
+    // Test decreasing amounts to find what actually fits
+    for (let chars = 50; chars >= 10; chars -= 10) {
+      const testText = '測'.repeat(chars);
+      bookText.textContent = testText;
+      
+      const fitsHeight = bookText.scrollHeight <= containerHeight * 0.95;
+      const fitsWidth = bookText.scrollWidth <= containerWidth * 0.95;
+      
+      console.log(`Test ${chars} chars - scrollH:${bookText.scrollHeight} scrollW:${bookText.scrollWidth} fits: H=${fitsHeight} W=${fitsWidth}`);
+      
+      if (fitsHeight && fitsWidth) {
+        safeChars = chars;
+        console.log(`✓ ${chars} chars fit!`);
+        break;
+      }
+    }
     
-    const usableHeight = Math.floor((containerHeight - paddingOffset - titleOffset) * 0.60); // Very conservative 60%
-    const usableWidth = Math.floor((containerWidth - paddingOffset) * 0.60);   // Very conservative 60%
-    
-    // Each vertical line runs top-to-bottom
-    const charsPerVerticalLine = Math.floor(usableHeight / (fontSize * 1.3));
-    
-    // Number of vertical lines that fit left-to-right
-    const numVerticalLines = Math.floor(usableWidth / (fontSize * lineHeight * 1.3));
-    
-    const total = Math.max(Math.floor(charsPerVerticalLine * numVerticalLines * 0.5), 50); // Use only 50% of calculation
-    
-    console.log('Vertical - usable:', usableHeight, 'x', usableWidth);
-    console.log('Vertical - chars/line:', charsPerVerticalLine, 'lines:', numVerticalLines, 'total:', total);
-    return total;
+    bookText.textContent = ''; // Clear
+    console.log('Vertical final:', safeChars, 'chars per page');
+    return safeChars;
     
   } else {
     // Horizontal mode - existing calculation works fine
