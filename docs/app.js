@@ -94,35 +94,49 @@ function calculateCharsPerPage() {
   const fontSize = parseInt(fontSizeInput.value);
   const lineHeight = 1.8;
   
-  // Get actual element dimensions
-  const availableHeight = bookText.clientHeight || 600;
-  const availableWidth = bookText.clientWidth || 800;
+  // Get actual container dimensions
+  const containerHeight = bookText.clientHeight || 600;
+  const containerWidth = bookText.clientWidth || 800;
   
-  // Use only a fraction of available space - ULTRA conservative
-  // The parent div has 16px padding, we need to account for that
-  const usableHeight = Math.floor(availableHeight * 0.70); // Only use 70% of height
-  const usableWidth = Math.floor(availableWidth * 0.90);   // Only use 90% of width
-  
-  console.log('Available:', availableHeight, 'x', availableWidth);
-  console.log('Usable:', usableHeight, 'x', usableWidth);
+  console.log('Container:', containerHeight, 'x', containerWidth);
   
   if (isVerticalMode) {
-    // Vertical mode: use FIXED safe value regardless of screen size
-    // Writing-mode calculation is completely unreliable
-    const fontSize = parseInt(fontSizeInput.value);
+    // For vertical: do actual measurement test
+    // Start with small amount and measure if it fits
+    const testText = '測'.repeat(100); // 100 chars of test text
+    bookText.textContent = testText;
     
-    // Safe formula based on font size only
-    // Larger font = fewer chars that fit
-    const safeChars = Math.max(Math.floor(2000 / fontSize), 30);
+    const testHeight = bookText.scrollHeight;
+    const testWidth = bookText.scrollWidth;
     
-    console.log('Vertical - fontSize:', fontSize, 'safe chars:', safeChars);
-    return safeChars;
+    console.log('Test 100 chars - scrollHeight:', testHeight, 'scrollWidth:', testWidth);
+    console.log('Container can fit - height?', testHeight <= containerHeight, 'width?', testWidth <= containerWidth);
+    
+    // Calculate how many times 100 chars fits
+    let fits = 1;
+    if (testHeight <= containerHeight && testWidth <= containerWidth) {
+      // 100 chars fits, try to estimate capacity
+      const heightRatio = containerHeight / testHeight;
+      const widthRatio = containerWidth / testWidth;
+      fits = Math.floor(Math.min(heightRatio, widthRatio) * 0.8); // 80% of theoretical max
+    }
+    
+    const total = Math.max(fits * 100, 50);
+    console.log('Vertical - fits:', fits, 'x 100 =', total, 'chars');
+    
+    bookText.textContent = ''; // Clear test
+    return total;
+    
   } else {
-    // Horizontal: lines (top to bottom)
+    // Horizontal mode - existing calculation works fine
+    const usableHeight = Math.floor(containerHeight * 0.70);
+    const usableWidth = Math.floor(containerWidth * 0.90);
+    
     const lineHeightPx = fontSize * lineHeight;
     const numLines = Math.floor(usableHeight / (lineHeightPx * 1.2));
     const charsPerLine = Math.floor(usableWidth / (fontSize * 0.8));
     const total = Math.max(numLines * charsPerLine, 50);
+    
     console.log('Horizontal - lines:', numLines, 'chars/line:', charsPerLine, 'total:', total);
     return total;
   }
