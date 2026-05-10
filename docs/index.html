@@ -54,11 +54,13 @@
     
     #book-text.horizontal {
       writing-mode: horizontal-tb;
+      white-space: pre-wrap; /* Preserve spaces and newlines */
     }
     
     #book-text.vertical {
       writing-mode: vertical-rl;
       text-orientation: upright;
+      white-space: normal; /* Allow wrapping to next vertical line */
     }
     
     .page-nav {
