@@ -121,8 +121,8 @@ function calculateCharsPerPage() {
       const testText = testContent.substring(0, chars);
       bookText.textContent = testText;
       
-      const fitsHeight = bookText.scrollHeight <= containerHeight * 0.85; // Very conservative for mobile footer
-      const fitsWidth = bookText.scrollWidth <= containerWidth * 0.85;   // Very conservative for edge safety
+      const fitsHeight = bookText.scrollHeight <= containerHeight * 0.80; // Extra conservative for mobile
+      const fitsWidth = bookText.scrollWidth <= containerWidth * 0.80;   // Extra conservative for left edge
       
       console.log(`Test ${chars} - H:${bookText.scrollHeight}/${containerHeight}(${fitsHeight}) W:${bookText.scrollWidth}/${containerWidth}(${fitsWidth})`);
       
